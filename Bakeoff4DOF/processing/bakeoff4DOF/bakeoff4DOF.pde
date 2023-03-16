@@ -12,6 +12,7 @@ float errorPenalty = 1.0f; //for every error, add this value to mean time
 int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false; //is the user done
+boolean mouseDrag = false;
 
 final int screenPPI = 72; //what is the DPI of the screen you are using
 //you can test this by drawing a 72x72 pixel rectangle in code, and then confirming with a ruler it is 1x1 inch. 
@@ -99,7 +100,11 @@ void draw() {
 
   //===========DRAW LOGO SQUARE=================
   pushMatrix();
-  translate(logoX, logoY); //translate draw center to the center oft he logo square
+  if (mouseDrag) {
+    logoX = mouseX;
+    logoY = mouseY;
+  }
+  translate(logoX, logoY);
   rotate(radians(logoRotation)); //rotate using the logo square as the origin
   noStroke();
   fill(60, 60, 192, 192);
@@ -160,6 +165,9 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
+  if (mouseOnLogo()) {
+    mouseDrag = true;
+  }
 }
 
 void mouseReleased()
@@ -178,6 +186,14 @@ void mouseReleased()
       finishTime = millis();
     }
   }
+  mouseDrag = false;
+}
+
+public boolean mouseOnLogo() {
+    boolean closeDist = dist(mouseX, mouseY, logoX, logoY) < inchToPix(.3f); //has to be within +-0.05"
+    //TODO: adjust this according to size of grid
+    //boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"
+    return closeDist;
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
