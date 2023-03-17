@@ -12,7 +12,6 @@ float errorPenalty = 1.0f; //for every error, add this value to mean time
 int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false; //is the user done
-boolean mouseDrag = false;
 
 final int screenPPI = 72; //what is the DPI of the screen you are using
 //you can test this by drawing a 72x72 pixel rectangle in code, and then confirming with a ruler it is 1x1 inch. 
@@ -39,7 +38,7 @@ void setup() {
   textFont(createFont("Arial", inchToPix(.3f))); //sets the font to Arial that is 0.3" tall
   textAlign(CENTER);
   rectMode(CENTER); //draw rectangles not from upper left, but from the center outwards
-  
+
   //don't change this! 
   border = inchToPix(2f); //padding of 1.0 inches
 
@@ -66,7 +65,7 @@ void draw() {
   background(40); //background is dark grey
   fill(200);
   noStroke();
-  
+
   //Test square in the top left corner. Should be 1 x 1 inch
   //rect(inchToPix(0.5), inchToPix(0.5), inchToPix(1), inchToPix(1));
 
@@ -86,16 +85,12 @@ void draw() {
     pushMatrix();
     Destination d = destinations.get(i); //get destination trial
     translate(d.x, d.y); //center the drawing coordinates to the center of the destination trial
-    
+
     rotate(radians(d.rotation)); //rotate around the origin of the Ddestination trial
     noFill();
     strokeWeight(3f);
-    if (trialIndex==i) {
+    if (trialIndex==i)
       stroke(255, 0, 0, 192); //set color to semi translucent
-      if (checkForSuccess()) {
-        stroke(0, 255, 0, 192); 
-      }
-    }
     else
       stroke(128, 128, 128, 128); //set color to semi translucent
     rect(0, 0, d.z, d.z);
@@ -104,11 +99,7 @@ void draw() {
 
   //===========DRAW LOGO SQUARE=================
   pushMatrix();
-  if (mouseDrag) {
-    logoX = mouseX;
-    logoY = mouseY;
-  }
-  translate(logoX, logoY);
+  translate(logoX, logoY); //translate draw center to the center oft he logo square
   rotate(radians(logoRotation)); //rotate using the logo square as the origin
   noStroke();
   fill(60, 60, 192, 192);
@@ -153,13 +144,28 @@ void scaffoldControlLogic()
   if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchToPix(.8f))
     logoX+=inchToPix(.02f);
 
-  //text("up", width/2, inchToPix(.4f));
-  //if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchToPix(.8f))
-  //  logoY-=inchToPix(.02f);
+  text("up", width/2, inchToPix(.4f));
+  if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchToPix(.8f))
+    logoY-=inchToPix(.02f);
 
-  text("next", width/2, height-inchToPix(.4f));
-  //check to see if user clicked next button which is used as a submit button
+  text("down", width/2, height-inchToPix(.4f));
   if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchToPix(.8f))
+    logoY+=inchToPix(.02f);
+}
+
+void mousePressed()
+{
+  if (startTime == 0) //start time on the instant of the first user click
+  {
+    startTime = millis();
+    println("time started!");
+  }
+}
+
+void mouseReleased()
+{
+  //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
+  if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
   {
     if (userDone==false && !checkForSuccess())
       errorCount++;
@@ -171,47 +177,20 @@ void scaffoldControlLogic()
       userDone = true;
       finishTime = millis();
     }
-    mousePressed = false;
   }
-}
-
-void mousePressed()
-{
-  if (startTime == 0) //start time on the instant of the first user click
-  {
-    startTime = millis();
-    println("time started!");
-  }
-  if (mouseOnLogo()) {
-    mouseDrag = true;
-  }
-}
-
-void mouseReleased()
-{
-  mouseDrag = false;
-}
-
-public boolean mouseOnLogo() {
-    boolean closeDist = dist(mouseX, mouseY, logoX, logoY) < logoZ/1.7; //has to be
-
-    //boolean closeDist = dist(mouseX, mouseY, logoX, logoY) < inchToPix(.3f); //has to be within +-0.05"
-    //TODO: adjust this according to size of grid
-    //boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"
-    return closeDist;
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
 {
-  Destination d = destinations.get(trialIndex);	
+  Destination d = destinations.get(trialIndex);  
   boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
   boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
-  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"	
+  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"  
 
   println("Close Enough Distance: " + closeDist + " (logo X/Y = " + d.x + "/" + d.y + ", destination X/Y = " + logoX + "/" + logoY +")");
   println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(d.rotation, logoRotation)+")");
-  println("Close Enough Z: " +  closeZ + " (logo Z = " + d.z + ", destination Z = " + logoZ +")mouseOnLogo");
+  println("Close Enough Z: " +  closeZ + " (logo Z = " + d.z + ", destination Z = " + logoZ +")");
   println("Close enough all: " + (closeDist && closeRotation && closeZ));
 
   return closeDist && closeRotation && closeZ;
