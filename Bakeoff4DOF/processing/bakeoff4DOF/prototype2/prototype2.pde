@@ -31,7 +31,93 @@ private class Destination
   float z = 0;
 }
 
+class ScrollBar {
+  int swidth, sheight;    // width and height of bar
+  float xpos, ypos;       // x and y position of bar
+  float spos, newspos;    // x position of slider
+  float sposMin, sposMax; // max and min values of slider
+  int loose;              // how loose/heavy
+  boolean over;           // is the mouse over the slider?
+  boolean locked;
+  float ratio;
+  float scale;
+  
+  ScrollBar (float xp, float yp, int sw, int sh, int l) {
+    swidth = sw;
+    sheight = sh;
+    int widthtoheight = sw - sh;
+    ratio = (float)sw / (float)widthtoheight;
+    xpos = xp;
+    ypos = yp-sheight/2;
+    spos = xpos + sw / 2 - sheight/2;
+    newspos = spos;
+    sposMin = xpos;
+    sposMax = xpos + swidth - sheight;
+    loose = l;
+    locked = false;
+    scale = 1;
+  }
+
+  void update() {
+    if (overEvent()) {
+      over = true;
+    } else {
+      over = false;
+    }
+    if (mousePressed && over) {
+      locked = true;
+    }
+    if (!mousePressed) {
+      locked = false;
+    }
+    if (locked) {
+      newspos = constrain(mouseX-sheight/2, sposMin, sposMax);
+    }
+    if (abs(newspos - spos) > 1) {
+      scale = (newspos - spos)/loose*logoZ/60;
+      logoZ += scale;
+      spos = spos + (newspos-spos)/loose;
+    }
+  }
+
+  float constrain(float val, float minv, float maxv) {
+    return min(max(val, minv), maxv);
+  }
+
+  boolean overEvent() {
+    if (mouseX > spos - sheight / 2 && mouseX < spos+sheight / 2 &&
+      mouseY > ypos && mouseY < ypos+sheight) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void display() {
+    noStroke();
+    fill(200);
+    rect(sposMin, ypos, sposMax, sheight);
+    if (over || locked) {
+      fill(0, 0, 0);
+    } else {
+      fill(102, 102, 102);
+    }
+    rect(spos, ypos, sheight, sheight);
+  }
+
+  float getPos() {
+    // Convert spos to be values between
+    // 0 and the total width of the scrollbar
+    return spos * ratio;
+  }
+
+  float getScale() {
+    return (spos - xpos) / (swidth / 2.0);
+  }
+}
+
 ArrayList<Destination> destinations = new ArrayList<Destination>();
+ScrollBar scroll;
 
 void setup() {
   size(1000, 800);  
@@ -42,6 +128,9 @@ void setup() {
   
   //don't change this! 
   border = inchToPix(2f); //padding of 1.0 inches
+
+  // set up scroll bar
+  scroll = new ScrollBar(0, height - 16, width / 2, 16, 2);
 
   println("creating "+trialCount + " targets");
   for (int i=0; i<trialCount; i++) //don't change this! 
@@ -66,7 +155,7 @@ void draw() {
   background(40); //background is dark grey
   fill(200);
   noStroke();
-  
+ 
   //Test square in the top left corner. Should be 1 x 1 inch
   //rect(inchToPix(0.5), inchToPix(0.5), inchToPix(1), inchToPix(1));
 
@@ -146,22 +235,23 @@ void scaffoldControlLogic()
 
   textSize(20);
   //lower right corner, decrease Z
-  fill(255, 255, 255);
+  /*fill(255, 255, 255);
   rect(width-inchToPix(.8f), height-inchToPix(.5f), inchToPix(.4f), inchToPix(.4f));
   fill(0, 0, 0);
   text("-", width-inchToPix(.8f), height-inchToPix(.4f));
-  if (mousePressed && width-inchToPix(.99f) < mouseX && mouseX < width - inchToPix(.6f) &&
+  xif (mousePressed && width-inchToPix(.99f) < mouseX && mouseX < width - inchToPix(.6f) &&
       mouseY > height-inchToPix(.7f))
-    logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone!
+    logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f));*/ //leave min and max alone!
 
   //lower right corner, increase Z
-  fill(255, 255, 255);
+  /*fill(255, 255, 255);
   rect(width-inchToPix(.4f), height-inchToPix(.5f), inchToPix(.4f), inchToPix(.4f));
   fill(0, 0, 0);
   text("+", width-inchToPix(.4f), height-inchToPix(.4f));
   if (mousePressed && width-inchToPix(.6f) < mouseX && mouseX < width - inchToPix(.2f) &&
       mouseY > height-inchToPix(.7f))
-    logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone! 
+    logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone!
+  */
 
   //left middle, move left
   //text("left", inchToPix(.4f), height/2);
@@ -176,6 +266,7 @@ void scaffoldControlLogic()
   rect(width/2 + width/3 + inchToPix(.6f), height-inchToPix(.8f), inchToPix(1f), inchToPix(.5f));
   fill(0, 0, 0);
   text("next", width/2 + width/3 + inchToPix(.6f), height-inchToPix(.7f));
+  
   //check to see if user clicked next button which is used as a submit button
   if (mousePressed && width/2 + width/3 < mouseX &&  mouseX < width/2 + width/3 + inchToPix(1.1f) &&
       height-inchToPix(1.05f) < mouseY && mouseY < height-inchToPix(.5f))
@@ -192,6 +283,9 @@ void scaffoldControlLogic()
     }
     mousePressed = false;
   }
+   
+  scroll.display();
+  scroll.update();
 }
 
 void mousePressed()
