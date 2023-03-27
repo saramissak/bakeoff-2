@@ -148,8 +148,6 @@ void setup() {
   Collections.shuffle(destinations); // randomize the order of the button; don't change this.
 }
 
-
-
 void draw() {
 
   background(40); //background is dark grey
@@ -220,19 +218,19 @@ void scaffoldControlLogic()
   fill(255, 255, 255);
   rect(inchToPix(1.6f), height-inchToPix(.9f), inchToPix(.8f), inchToPix(.8f));
   fill(0, 0, 0);
-  text("CCW", inchToPix(1.6f), height-inchToPix(.8f));
+  text("CW", inchToPix(1.6f), height-inchToPix(.8f));
   if (mousePressed && inchToPix(1.2f) < mouseX && mouseX < inchToPix(2.0f) &&
       height-inchToPix(1.3f) < mouseY && mouseY < height-inchToPix(.5f))
-    logoRotation--;
+    logoRotation++;
 
   //lower right corner, rotate clockwise
   fill(255, 255, 255);
   rect(inchToPix(.8f), height-inchToPix(.9f), inchToPix(.8f), inchToPix(.8f));
   fill(0, 0, 0);
-  text("CW", inchToPix(.8f), height-inchToPix(.8f));
+  text("CCW", inchToPix(.8f), height-inchToPix(.8f));
   if (mousePressed && inchToPix(.4f) < mouseX && mouseX < inchToPix(1.2f) &&
       height-inchToPix(1.3f) < mouseY && mouseY < height-inchToPix(.5f))
-    logoRotation++;
+    logoRotation--;
 
   textSize(20);
   //lower right corner, decrease Z
@@ -261,7 +259,7 @@ void scaffoldControlLogic()
   
   //check to see if user clicked next button which is used as a submit button
   if (mousePressed && width/5 - inchToPix(.5f) < mouseX &&  mouseX < width/5 + inchToPix(.5f) &&
-      height-inchToPix(1.05f) < mouseY && mouseY < height-inchToPix(.5f))
+      height-inchToPix(1.3f) < mouseY && mouseY < height-inchToPix(.7f))
   {
     if (userDone==false && !checkForSuccess())
       errorCount++;
