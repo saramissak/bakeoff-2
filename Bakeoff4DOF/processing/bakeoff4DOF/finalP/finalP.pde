@@ -98,9 +98,9 @@ class ScrollBar {
     fill(200);
     rect(sposMin, ypos, sposMax, sheight);
     if (over || locked) {
-      fill(0, 0, 0);
+      fill(0, 255, 0);
     } else {
-      fill(102, 102, 102);
+      fill(255, 0, 255);
     }
     rect(spos, ypos, sheight, sheight);
   }
@@ -255,9 +255,9 @@ void scaffoldControlLogic()
   */
 
   fill(255, 255, 255);
-  rect(width/5, height-inchToPix(.8f), inchToPix(1f), inchToPix(.5f));
+  rect(width/5, height-inchToPix(1f), inchToPix(1f), inchToPix(.5f));
   fill(0, 0, 0);
-  text("next", width/5, height-inchToPix(.7f));
+  text("next", width/5, height-inchToPix(.9f));
   
   //check to see if user clicked next button which is used as a submit button
   if (mousePressed && width/5 - inchToPix(.5f) < mouseX &&  mouseX < width/5 + inchToPix(.5f) &&
